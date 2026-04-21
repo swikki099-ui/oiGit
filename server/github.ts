@@ -1,4 +1,4 @@
-import { log } from "./index";
+import { log } from "./log";
 import type { GitHubStats, Trophy, TopRepo } from "@shared/schema";
 
 export type { GitHubStats, Trophy, TopRepo };

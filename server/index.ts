@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import { log } from "./log";
 
 const app = express();
 const httpServer = createServer(app);
@@ -42,6 +43,4 @@ app.use((req, res, next) => {
   });
 })();
 
-export function log(message: string) {
-  console.log(`[oi-git] ${message}`);
-}
+// End of file

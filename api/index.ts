@@ -9,6 +9,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Register API routes
-registerRoutes(httpServer, app);
+await registerRoutes(httpServer, app);
 
 export default app;

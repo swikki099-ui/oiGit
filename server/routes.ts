@@ -10,7 +10,7 @@ import {
   generateHeatmapSVG,
   generateTopReposSVG,
 } from "./svg-generator";
-import { log } from "./index";
+import { log } from "./log";
 import { githubUsernameSchema } from "@shared/schema";
 
 /** Renders a small error SVG so embeds still return a valid image. */
