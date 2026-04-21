@@ -10,7 +10,7 @@
 
 **Your GitHub, In Print.**
 
-Oi Git is an open-source visualizer that transforms raw GitHub developer data into stunning, high-contrast, editorial-style layouts. Generate beautiful, embeddable SVGs for your `README.md` instantly—without authentication.
+Oi Git is an open-source visualizer that transforms raw GitHub developer data into stunning, high contrast, editorial style layouts. Generate beautiful, embeddable SVGs for your `README.md` instantly without authentication.
 
 ---
 
