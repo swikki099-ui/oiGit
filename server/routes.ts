@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { getGitHubStats } from "./github";
 import {
@@ -11,7 +11,7 @@ import {
   generateTopReposSVG,
 } from "./svg-generator";
 import { log } from "./log";
-import { githubUsernameSchema } from "@shared/schema";
+import { githubUsernameSchema } from "../shared/schema";
 
 /** Renders a small error SVG so embeds still return a valid image. */
 function errorSVG(message: string): string {
@@ -22,10 +22,10 @@ function errorSVG(message: string): string {
 </svg>`.trim();
 }
 
-export async function registerRoutes(
-  httpServer: Server,
-  app: Express
-): Promise<Server> {
+export function registerRoutes(
+  app: Express,
+  httpServer?: Server
+): Server | undefined {
 
   // ── JSON endpoint for the frontend dashboard ──────────────────────────────
   app.get("/api/user/:username", async (req, res) => {
@@ -114,6 +114,14 @@ export async function registerRoutes(
         .status(isNotFound ? 404 : isRateLimit ? 429 : 500)
         .send(errorSVG(friendlyMsg));
     }
+  });
+
+  // ── Error handling middleware ─────────────────────────────────────────────
+  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
+    log(`Unhandled error: ${message}`);
+    res.status(status).json({ error: message });
   });
 
   return httpServer;

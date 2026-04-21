@@ -1,5 +1,5 @@
 import { log } from "./log";
-import type { GitHubStats, Trophy, TopRepo } from "@shared/schema";
+import type { GitHubStats, Trophy, TopRepo } from "../shared/schema";
 
 export type { GitHubStats, Trophy, TopRepo };
 
@@ -42,8 +42,10 @@ function evictExpired(): void {
   }
 }
 
-// Evict expired entries every 10 minutes
-setInterval(evictExpired, 10 * 60 * 1000);
+// Evict expired entries occasionally (10% chance per request) to keep memory in check
+function maybeEvict(): void {
+  if (Math.random() < 0.1) evictExpired();
+}
 
 // ─── Trophy Logic ─────────────────────────────────────────────────────────────
 
@@ -428,6 +430,7 @@ export async function getGitHubStats(username: string): Promise<GitHubStats> {
     return cached;
   }
 
+  maybeEvict();
   try {
     log(`Fetching stats for ${username}`);
 

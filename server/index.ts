@@ -23,12 +23,7 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  await registerRoutes(httpServer, app);
-
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    res.status(status).json({ message: err.message || "Internal Server Error" });
-  });
+  registerRoutes(app, httpServer);
 
   if (process.env.NODE_ENV === "production") {
     serveStatic(app);
