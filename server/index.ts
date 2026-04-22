@@ -1,9 +1,10 @@
-import express, { type Request, Response, NextFunction } from "express";
+import expressModule, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 import { log } from "./log";
 
+const express = (expressModule as any).default || expressModule;
 const app = express();
 const httpServer = createServer(app);
 
@@ -11,7 +12,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Minimal request logger for API routes
-app.use((req, res, next) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
   const start = Date.now();
   res.on("finish", () => {
     if (req.path.startsWith("/api")) {

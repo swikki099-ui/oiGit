@@ -1,6 +1,7 @@
-import express from "express";
+import expressModule from "express";
 import { registerRoutes } from "../server/routes";
 
+const express = (expressModule as any).default || expressModule;
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
