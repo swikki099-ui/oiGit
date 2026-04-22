@@ -17,7 +17,7 @@ import { Search, Github, Share2, Copy, Check, ArrowLeft, Code, AlertCircle, Info
 import { toast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import type { GitHubStats } from "@shared/schema";
+import type { GitHubStats } from "@shared/types";
 
 export default function UserProfile() {
   const [match, params] = useRoute("/u/:username");

@@ -11,7 +11,7 @@ import {
   generateTopReposSVG,
 } from "./svg-generator";
 import { log } from "./log";
-import { githubUsernameSchema } from "../shared/schema";
+import { githubUsernameSchema } from "../shared/types";
 
 /** Renders a small error SVG so embeds still return a valid image. */
 function errorSVG(message: string): string {

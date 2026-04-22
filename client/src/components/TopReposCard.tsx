@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Star, GitFork, ExternalLink, Share2 } from "lucide-react";
-import type { TopRepo } from "@shared/schema";
+import type { TopRepo } from "@shared/types";
 
 interface TopReposCardProps {
   repos: TopRepo[];

@@ -1,5 +1,5 @@
 import { log } from "./log";
-import type { GitHubStats, Trophy, TopRepo } from "../shared/schema";
+import type { GitHubStats, Trophy, TopRepo } from "../shared/types";
 
 export type { GitHubStats, Trophy, TopRepo };
 
