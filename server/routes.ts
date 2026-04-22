@@ -1,5 +1,4 @@
 import type { Express, Request, Response, NextFunction } from "express";
-import { createServer, type Server } from "http";
 import { getGitHubStats } from "./github";
 import {
   generateStatsSVG,
@@ -22,10 +21,7 @@ function errorSVG(message: string): string {
 </svg>`.trim();
 }
 
-export function registerRoutes(
-  app: Express,
-  httpServer?: Server
-): Server | undefined {
+export function registerRoutes(app: Express): void {
 
   // ── JSON endpoint for the frontend dashboard ──────────────────────────────
   app.get("/api/user/:username", async (req, res) => {
@@ -123,6 +119,4 @@ export function registerRoutes(
     log(`Unhandled error: ${message}`);
     res.status(status).json({ error: message });
   });
-
-  return httpServer;
 }

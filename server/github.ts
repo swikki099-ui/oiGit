@@ -37,9 +37,9 @@ function setCache(username: string, data: GitHubStats): void {
 /** Clears stale entries — call periodically to avoid unbounded memory growth. */
 function evictExpired(): void {
   const now = Date.now();
-  for (const [key, entry] of statsCache) {
+  Array.from(statsCache.entries()).forEach(([key, entry]) => {
     if (now > entry.expiresAt) statsCache.delete(key);
-  }
+  });
 }
 
 // Evict expired entries occasionally (10% chance per request) to keep memory in check
@@ -498,10 +498,16 @@ export async function getGitHubStats(username: string): Promise<GitHubStats> {
       organizations: 0,
     };
 
-    let streakStats = {
+    let streakStats: {
+      currentStreak: number;
+      longestStreak: number;
+      totalContributions: number;
+      weeklyContributions: number[];
+    } = {
       currentStreak: 0,
       longestStreak: 0,
       totalContributions: 0,
+      weeklyContributions: [],
     };
 
     if (hasToken) {

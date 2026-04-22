@@ -23,7 +23,7 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  registerRoutes(app, httpServer);
+  registerRoutes(app);
 
   if (process.env.NODE_ENV === "production") {
     serveStatic(app);

@@ -1,4 +1,4 @@
-import type { GitHubStats } from "@shared/schema";
+import type { GitHubStats } from "../shared/types";
 
 const CARD_WIDTH = 495;
 
