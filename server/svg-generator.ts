@@ -113,21 +113,17 @@ export function generateStatsSVG(stats: GitHubStats, opts?: SvgOptions): string 
   const items = statsData.map((stat, i) => {
     const col = i % 2;
     const row = Math.floor(i / 2);
-    const x = col === 0 ? 25 : 255;
-    const y = 75 + row * 36;
+    const x = col === 0 ? 25 : 260;
+    const y = 80 + row * 40;
     return `
     <g transform="translate(${x}, ${y})">
-      <text x="0" y="-4" class="stat-label">${escapeHtml(stat.label)}</text>
-      <text x="0" y="16" class="stat-value">${escapeHtml(stat.value)}</text>
+      <text x="0" y="0" class="stat-label">${escapeHtml(stat.label)}:</text>
+      <text x="0" y="18" class="stat-value">${escapeHtml(stat.value)}</text>
     </g>`;
   }).join("");
 
-  const dataRows = 5; // 10 items / 2 cols
-  const headerH = 60;
   const degradedNote = dataNote(t, stats);
-
-  const innerH = dataRows * 36 + 8;
-  const height = headerH + innerH + (stats.isFullData ? 28 : 42);
+  const height = stats.isFullData ? 300 : 315;
 
   return `<svg width="${CARD_WIDTH}" height="${height}" viewBox="0 0 ${CARD_WIDTH} ${height}" fill="none" xmlns="http://www.w3.org/2000/svg">
   <style>
@@ -140,7 +136,7 @@ export function generateStatsSVG(stats: GitHubStats, opts?: SvgOptions): string 
   <text x="25" y="40" class="header">@${escapeHtml(stats.username)}</text>
   <text x="${CARD_WIDTH - 10}" y="${height - 10}" text-anchor="end" class="footer">oigit.app</text>
   ${items}
-  <g transform="translate(0, ${headerH + innerH})">${degradedNote}</g>
+  ${!stats.isFullData ? `<g transform="translate(0, 280)">${degradedNote}</g>` : ""}
 </svg>`.trim();
 }
 
@@ -153,21 +149,20 @@ export function generateLanguagesSVG(stats: GitHubStats, opts?: SvgOptions): str
   const languages = stats.languages.slice(0, 5);
 
   const bars = languages.map((lang, i) => {
-    const y = 75 + i * 36;
+    const y = 80 + i * 40;
     const barFill = isNews ? "#111111" : lang.color;
     const barBg = isNews ? "transparent" : "#21262d";
     const barBorder = isNews ? `stroke="${t.border}" stroke-width="1"` : "";
-    const bw = 445;
     return `
     <g transform="translate(25, ${y})">
       <text x="0" y="0" class="lang-label">${escapeHtml(lang.name)}</text>
-      <text x="${bw}" y="0" text-anchor="end" class="lang-percent">${lang.percentage}%</text>
-      <rect x="0" y="8" width="${bw}" height="10" rx="${isNews ? '0' : '4'}" fill="${barBg}" ${barBorder}/>
-      <rect x="0" y="8" width="${Math.round(bw * lang.percentage / 100)}" height="10" rx="${isNews ? '0' : '4'}" fill="${barFill}"/>
+      <text x="445" y="0" text-anchor="end" class="lang-percent">${lang.percentage}%</text>
+      <rect x="0" y="8" width="445" height="8" rx="${isNews ? '0' : '4'}" fill="${barBg}" ${barBorder}/>
+      <rect x="0" y="8" width="${Math.round(445 * lang.percentage / 100)}" height="8" rx="${isNews ? '0' : '4'}" fill="${barFill}"/>
     </g>`;
   }).join("");
 
-  const h = 60 + languages.length * 36 + 20;
+  const h = 70 + languages.length * 40 + 20;
 
   return `<svg width="${CARD_WIDTH}" height="${h}" viewBox="0 0 ${CARD_WIDTH} ${h}" fill="none" xmlns="http://www.w3.org/2000/svg">
   <style>
@@ -191,7 +186,8 @@ export function generateStreakSVG(stats: GitHubStats, opts?: SvgOptions): string
   const accent = isNews ? t.accent1 : "#fb8500";
   const streakColor = isNews ? t.accent2 : "#fb8500";
 
-  const h = stats.isFullData ? 175 : 195;
+  const note = dataNote(t, stats);
+  const h = stats.isFullData ? 180 : 195;
 
   return `<svg width="${CARD_WIDTH}" height="${h}" viewBox="0 0 ${CARD_WIDTH} ${h}" fill="none" xmlns="http://www.w3.org/2000/svg">
   <style>
@@ -205,19 +201,18 @@ export function generateStreakSVG(stats: GitHubStats, opts?: SvgOptions): string
   <text x="25" y="40" class="header">GitHub Streak</text>
   <text x="${CARD_WIDTH - 10}" y="${h - 10}" text-anchor="end" class="footer">oigit.app</text>
 
-  <g transform="translate(125, 95)">
+  <g transform="translate(100, 90)">
     <text x="0" y="0" text-anchor="middle" class="streak-value">${stats.streak.current}</text>
     <text x="0" y="20" text-anchor="middle" class="stat-label">Current Streak</text>
   </g>
-  <g transform="translate(370, 95)">
+  <g transform="translate(300, 90)">
     <text x="0" y="0" text-anchor="middle" class="stat-value">${stats.streak.longest}</text>
     <text x="0" y="20" text-anchor="middle" class="stat-label">Longest Streak</text>
   </g>
-  <g transform="translate(247, ${h - 30})">
+  <g transform="translate(247, ${h - 40})">
     <text x="0" y="0" text-anchor="middle" class="stat-label">Total Contributions: ${stats.streak.total.toLocaleString()}</text>
   </g>
-
-  <g transform="translate(0, ${!stats.isFullData ? h - 50 : -10})">${dataNote(t, stats)}</g>
+  ${note}
 </svg>`.trim();
 }
 
@@ -261,7 +256,7 @@ export function generateTrophiesSVG(stats: GitHubStats, opts?: SvgOptions): stri
     </g>`;
   }).join("");
 
-  const h = trophies.length > 3 ? 225 : 150;
+  const h = trophies.length > 3 ? 240 : 160;
 
   return `<svg width="${CARD_WIDTH}" height="${h}" viewBox="0 0 ${CARD_WIDTH} ${h}" fill="none" xmlns="http://www.w3.org/2000/svg">
   <style>
@@ -295,20 +290,20 @@ export function generateOverviewSVG(stats: GitHubStats, opts?: SvgOptions): stri
   else if (score >= 45) rank = "B";
   else if (score >= 30) rank = "C";
 
-  return `<svg width="${CARD_WIDTH}" height="145" viewBox="0 0 ${CARD_WIDTH} 145" fill="none" xmlns="http://www.w3.org/2000/svg">
+  return `<svg width="${CARD_WIDTH}" height="150" viewBox="0 0 ${CARD_WIDTH} 150" fill="none" xmlns="http://www.w3.org/2000/svg">
   <style>
     .header { font: ${t.fontHeader}; fill: ${accent} }
     .rank { font: ${isNews ? "900 56px 'Times New Roman', serif" : "800 48px 'Segoe UI', sans-serif"}; fill: ${isNews ? t.text : '#e3b341'} }
     .score { font: ${t.fontLabel}; fill: ${t.textDim}; text-transform: uppercase }
     .footer { font: ${t.fontFooter}; fill: ${t.textDim}; text-transform: uppercase }
   </style>
-  <rect width="${CARD_WIDTH}" height="145" rx="${t.rx}" fill="${t.bg}" stroke="${t.border}" stroke-width="${t.strokeWidth}"/>
+  <rect width="${CARD_WIDTH}" height="150" rx="${t.rx}" fill="${t.bg}" stroke="${t.border}" stroke-width="${t.strokeWidth}"/>
   <text x="25" y="40" class="header">Global Rank</text>
-  <text x="${CARD_WIDTH - 10}" y="135" text-anchor="end" class="footer">oigit.app</text>
+  <text x="${CARD_WIDTH - 10}" y="140" text-anchor="end" class="footer">oigit.app</text>
 
-  <text x="140" y="105" text-anchor="middle" class="rank">${rank}</text>
-  <text x="370" y="95" text-anchor="middle" font-family="${isNews ? "'Times New Roman', serif" : "'Segoe UI', sans-serif"}" font-weight="700" font-size="42" fill="${isNews ? t.text : '#e3b341'}">${score}</text>
-  <text x="370" y="115" text-anchor="middle" class="score">Score / 100</text>
+  <text x="140" y="110" text-anchor="middle" class="rank">${rank}</text>
+  <text x="360" y="100" text-anchor="middle" font-family="${isNews ? "'Times New Roman', serif" : "'Segoe UI', sans-serif"}" font-weight="700" font-size="42" fill="${isNews ? t.text : '#e3b341'}">${score}</text>
+  <text x="360" y="120" text-anchor="middle" class="score">Score / 100</text>
 </svg>`.trim();
 }
 
@@ -335,14 +330,14 @@ export function generateHeatmapSVG(stats: GitHubStats, opts?: SvgOptions): strin
     return `<rect x="${x}" y="${y}" width="6" height="${barH}" rx="${isNews ? '0' : '1'}" fill="${fill}"/>`;
   }).join("");
 
-  return `<svg width="${CARD_WIDTH}" height="140" viewBox="0 0 ${CARD_WIDTH} 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+  return `<svg width="${CARD_WIDTH}" height="130" viewBox="0 0 ${CARD_WIDTH} 130" fill="none" xmlns="http://www.w3.org/2000/svg">
   <style>
     .header { font: ${t.fontHeader}; fill: ${accent} }
     .footer { font: ${t.fontFooter}; fill: ${t.textDim}; text-transform: uppercase }
   </style>
-  <rect width="${CARD_WIDTH}" height="140" rx="${t.rx}" fill="${t.bg}" stroke="${t.border}" stroke-width="${t.strokeWidth}"/>
+  <rect width="${CARD_WIDTH}" height="130" rx="${t.rx}" fill="${t.bg}" stroke="${t.border}" stroke-width="${t.strokeWidth}"/>
   <text x="25" y="40" class="header">Activity Heatmap</text>
-  <text x="${CARD_WIDTH - 10}" y="130" text-anchor="end" class="footer">oigit.app</text>
+  <text x="${CARD_WIDTH - 10}" y="120" text-anchor="end" class="footer">oigit.app</text>
   ${bars}
 </svg>`.trim();
 }
@@ -356,7 +351,7 @@ export function generateTopReposSVG(stats: GitHubStats, opts?: SvgOptions): stri
 
   const repos = stats.topRepos.slice(0, 3);
   const items = repos.map((repo, i) => {
-    const y = 70 + i * 44;
+    const y = 70 + i * 45;
     return `
     <g transform="translate(25, ${y})">
       <text x="0" y="0" font-family="${isNews ? "'Times New Roman', serif" : "'Segoe UI', sans-serif"}" font-weight="600" font-size="${isNews ? '18' : '14'}" fill="${isNews ? t.text : '#58a6ff'}">${escapeHtml(repo.name)}</text>
@@ -365,7 +360,7 @@ export function generateTopReposSVG(stats: GitHubStats, opts?: SvgOptions): stri
     </g>`;
   }).join("");
 
-  const h = 80 + repos.length * 44;
+  const h = 80 + repos.length * 45;
 
   return `<svg width="${CARD_WIDTH}" height="${h}" viewBox="0 0 ${CARD_WIDTH} ${h}" fill="none" xmlns="http://www.w3.org/2000/svg">
   <style>
