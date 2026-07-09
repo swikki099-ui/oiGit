@@ -54,13 +54,14 @@ export default async function handler(
       const stats = await fetchStats(raw);
       return sendJSON(res, 200, stats);
     } catch (err: any) {
-      const status = getUserErrorStatus(err.message);
-      const message = status === 404
+      const msg = err?.message || "Failed to fetch GitHub stats";
+      const status = getUserErrorStatus(msg);
+      const friendly = status === 404
         ? "GitHub user not found"
         : status === 429
-          ? err.message
+          ? msg
           : "Failed to fetch GitHub stats";
-      return sendJSON(res, status, { error: message });
+      return sendJSON(res, status, { error: friendly });
     }
   }
 
@@ -80,8 +81,9 @@ export default async function handler(
       const svg = generateSvgForType(stats, type, { theme });
       return sendSVG(res, 200, svg);
     } catch (err: any) {
-      const status = getUserErrorStatus(err.message);
-      return sendSVG(res, status, errorSVG(err.message));
+      const msg = err?.message || "Failed to fetch stats";
+      const status = getUserErrorStatus(msg);
+      return sendSVG(res, status, errorSVG(msg));
     }
   }
 

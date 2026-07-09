@@ -26,14 +26,15 @@ export function registerRoutes(app: Express): void {
       const stats = await fetchStats(req.params.username);
       res.json(stats);
     } catch (error: any) {
-      log(`Error in /api/user/:username: ${error.message}`);
-      const status = getUserErrorStatus(error.message);
-      const message = status === 404
+      const msg = error?.message || "Failed to fetch GitHub stats";
+      log(`Error in /api/user/:username: ${msg}`);
+      const status = getUserErrorStatus(msg);
+      const friendly = status === 404
         ? "GitHub user not found"
         : status === 429
-          ? error.message
+          ? msg
           : "Failed to fetch GitHub stats";
-      res.status(status).json({ error: message });
+      res.status(status).json({ error: friendly });
     }
   });
 
@@ -57,10 +58,11 @@ export function registerRoutes(app: Express): void {
       res.setHeader("Cache-Control", "public, max-age=1800, stale-while-revalidate=300");
       res.send(svg);
     } catch (error: any) {
-      log(`Error in /api SVG endpoint: ${error.message}`);
-      const status = getUserErrorStatus(error.message);
+      const msg = error?.message || "Failed to fetch stats";
+      log(`Error in /api SVG endpoint: ${msg}`);
+      const status = getUserErrorStatus(msg);
       res.setHeader("Content-Type", "image/svg+xml");
-      res.status(status).send(errorSVG(error.message));
+      res.status(status).send(errorSVG(msg));
     }
   });
 
