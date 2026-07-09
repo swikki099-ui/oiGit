@@ -55,6 +55,8 @@ export interface GitHubStats {
   trophies: Trophy[];
   /** true = full GraphQL data; false = limited REST-only data */
   isFullData: boolean;
+  /** true = REST fallback was used despite having a token (GraphQL failed) */
+  graphqlError?: boolean;
 }
 
 // Zod validator for the GitHub username format

@@ -200,7 +200,8 @@ async function fetchGitHubREST(endpoint: string): Promise<any> {
         : "soon";
       throw new Error(`GitHub API rate limit exceeded. Resets at ${resetTime}.`);
     }
-    throw new Error(`GitHub API error: ${response.statusText}`);
+    const body = await response.text().catch(() => "");
+    throw new Error(`GitHub API error (${response.status}): ${response.statusText}${body ? ` — ${body.slice(0, 200)}` : ""}`);
   }
 
   return response.json();
@@ -210,6 +211,7 @@ async function fetchGitHubGraphQL(query: string, variables: any): Promise<any> {
   const token = process.env.GITHUB_TOKEN;
 
   if (!token) {
+    log("No GITHUB_TOKEN set — GraphQL queries skipped, REST fallback only");
     return null;
   }
 
@@ -226,7 +228,8 @@ async function fetchGitHubGraphQL(query: string, variables: any): Promise<any> {
   });
 
   if (!response.ok) {
-    log(`GraphQL error: ${response.statusText}`);
+    const body = await response.text().catch(() => "");
+    log(`GraphQL HTTP ${response.status}: ${response.statusText}${body ? ` — ${body.slice(0, 300)}` : ""}`);
     return null;
   }
 
@@ -489,6 +492,7 @@ export async function getGitHubStats(username: string): Promise<GitHubStats> {
     // ── Contribution & Streak stats ────────────────────────────────────────
     const hasToken = Boolean(process.env.GITHUB_TOKEN);
     let isFullData = false;
+    let graphqlError = false;
 
     let contributionStats = {
       totalCommits: 0,
@@ -514,6 +518,7 @@ export async function getGitHubStats(username: string): Promise<GitHubStats> {
     };
 
     if (hasToken) {
+      log(`Token detected for ${username}, attempting GraphQL queries`);
       const [cs, ss] = await Promise.all([
         getContributionStats(username),
         getStreakStats(username),
@@ -524,13 +529,15 @@ export async function getGitHubStats(username: string): Promise<GitHubStats> {
         streakStats = ss;
         isFullData = true;
       } else {
-        // GraphQL returned zeros — fall through to REST fallback
-        log(`GraphQL returned zero contributions for ${username}, falling back to REST`);
+        log(`GraphQL returned zero contributions for ${username} — token may lack required scopes (needs repo or read:user)`);
       }
+    } else {
+      log(`No GITHUB_TOKEN set for ${username} — using public REST API (limited data)`);
     }
 
     if (!isFullData) {
-          // REST-based approximation from public events (last ~100)
+      graphqlError = hasToken;
+      // REST-based approximation from public events (last ~100)
       const pushEvents = events.filter((e: any) => e.type === "PushEvent");
       const prEvents = events.filter((e: any) => e.type === "PullRequestEvent");
       const issueEvents = events.filter((e: any) => e.type === "IssuesEvent");
@@ -627,6 +634,7 @@ export async function getGitHubStats(username: string): Promise<GitHubStats> {
       weeklyContributions: streakStats.weeklyContributions ?? [],
       trophies,
       isFullData,
+      graphqlError,
     };
 
     setCache(username, result);

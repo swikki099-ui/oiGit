@@ -21,10 +21,12 @@ export interface SvgQuery {
 /** Renders a small error SVG so embeds still return a valid image. */
 export function errorSVG(message?: string): string {
   const safe = message || "Internal error";
-  return `<svg width="495" height="120" xmlns="http://www.w3.org/2000/svg">
-  <rect width="495" height="120" rx="4.5" fill="#0d1117" stroke="#f85149"/>
-  <text x="247" y="55" text-anchor="middle" font-family="monospace" font-size="13" fill="#f85149">⚠ ${safe}</text>
-  <text x="247" y="80" text-anchor="middle" font-family="monospace" font-size="11" fill="#8b949e">Oi Git — oigit.app</text>
+  return `<svg width="495" height="110" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="495" height="110" rx="8" fill="#0d1117" stroke="#30363d" stroke-width="1"/>
+  <rect x="0" y="0" width="495" height="48" rx="8" fill="#161b22"/>
+  <rect x="0" y="40" width="495" height="8" fill="#161b22"/>
+  <text x="247" y="75" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#f85149" font-weight="600">${safe}</text>
+  <text x="485" y="100" text-anchor="end" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#8b949e">oigit.app</text>
 </svg>`.trim();
 }
 
