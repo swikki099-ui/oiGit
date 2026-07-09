@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./client/public/favicon.png" width="64" height="64" alt="Oi Git Logo">
+  <img src="./client/public/favicon.png" width="120" height="120" alt="Oi Git Logo">
 </p>
 
 <h1 align="center">Oi Git</h1>
