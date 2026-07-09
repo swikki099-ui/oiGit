@@ -39,7 +39,7 @@ async function buildServer() {
  *  everything so that /var/task/api/index.js has no unresolved imports. */
 async function buildServerless() {
   await esbuild({
-    entryPoints: ["api/index.ts"],
+    entryPoints: ["api/_handler.ts"],
     platform: "node",
     bundle: true,
     format: "esm",
