@@ -1,10 +1,22 @@
-![Oi Git Logo](./client/public/favicon.png)
+<p align="center">
+  <img src="./client/public/favicon.png" width="64" height="64" alt="Oi Git Logo">
+</p>
 
-# Oi Git
+<h1 align="center">Oi Git</h1>
 
-[Website](https://oigit.vercel.app) • [Docs](https://oigit.vercel.app/docs) • [Issues](https://github.com/chaursia/oiGit/issues) • [Contributing](https://github.com/chaursia/oiGit/pulls)
+<p align="center">
+  <a href="https://oigit.vercel.app">Website</a> •
+  <a href="https://oigit.vercel.app/docs">Docs</a> •
+  <a href="https://github.com/chaursia/oiGit/issues">Issues</a> •
+  <a href="https://github.com/chaursia/oiGit/pulls">Contributing</a>
+</p>
 
-![Version](https://img.shields.io/github/package-json/v/chaursia/oiGit?style=flat-square&color=blue) ![Stars](https://img.shields.io/github/stars/chaursia/oiGit?style=flat-square&color=yellow) ![Forks](https://img.shields.io/github/forks/chaursia/oiGit?style=flat-square&color=orange) ![License](https://img.shields.io/github/license/chaursia/oiGit?style=flat-square&color=brightgreen)
+<p align="center">
+  <img src="https://img.shields.io/github/package-json/v/chaursia/oiGit?style=flat-square&color=blue" alt="Version">
+  <img src="https://img.shields.io/github/stars/chaursia/oiGit?style=flat-square&color=yellow" alt="Stars">
+  <img src="https://img.shields.io/github/forks/chaursia/oiGit?style=flat-square&color=orange" alt="Forks">
+  <img src="https://img.shields.io/github/license/chaursia/oiGit?style=flat-square&color=brightgreen" alt="License">
+</p>
 
 ---
 
