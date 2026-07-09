@@ -37,7 +37,7 @@ export default function UserProfile() {
     heatmap: true,
     repos: true
   });
-  const [useNewsprintTheme, setUseNewsprintTheme] = useState(false);
+  const [selectedTheme, setSelectedTheme] = useState<string>("none");
 
   const { data, isLoading, error } = useQuery<GitHubStats>({
     queryKey: ["github-stats", username],
@@ -82,10 +82,21 @@ export default function UserProfile() {
 
   const getEmbedCode = (type: string) => {
     const baseUrl = window.location.origin + "/api";
-    const themeParam = useNewsprintTheme ? "&theme=newsprint" : "";
+    const themeParam = selectedTheme !== "none" ? `&theme=${selectedTheme}` : "";
     
     if (type === "composite") {
       const types = Object.keys(compositeSelection).filter(k => compositeSelection[k as keyof typeof compositeSelection]);
+      // If all 7 are selected, offer the single composite SVG endpoint
+      const allSelected = types.length === 7;
+      if (allSelected) {
+        const url = `${baseUrl}?username=${username}&type=composite${themeParam}`;
+        const alt = `${username}'s GitHub Composite`;
+        return {
+          markdown: `[![${alt}](${url})](https://github.com/${username})`,
+          html: `<a href="https://github.com/${username}"><img src="${url}" alt="${alt}" /></a>`,
+          link: url,
+        };
+      }
       return {
         markdown: types.map(t => `[![${username}'s GitHub ${t}](${baseUrl}?username=${username}&type=${t}${themeParam})](https://github.com/${username})`).join('\n'),
         html: types.map(t => `<a href="https://github.com/${username}"><img src="${baseUrl}?username=${username}&type=${t}${themeParam}" alt="${username}'s GitHub ${t}" /></a>`).join('\n'),
@@ -302,15 +313,20 @@ export default function UserProfile() {
               Copy snippets to your GitHub README.
             </DialogDescription>
             <div className="mt-2 pt-2 border-t border-dotted border-[#737373]">
-               <label className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest cursor-pointer text-[#111111]">
-                  <input 
-                    type="checkbox" 
-                    className="accent-[#111111] w-3 h-3 cursor-pointer"
-                    checked={useNewsprintTheme}
-                    onChange={(e) => setUseNewsprintTheme(e.target.checked)}
-                  />
-                  Use Newsprint Design Theme
-               </label>
+              <label className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest cursor-pointer text-[#111111]">
+                <span>Theme:</span>
+                <select
+                  value={selectedTheme}
+                  onChange={(e) => setSelectedTheme(e.target.value)}
+                  className="border border-[#111111] bg-white font-mono text-[10px] uppercase tracking-widest p-1"
+                >
+                  <option value="none">Default (Dark)</option>
+                  <option value="newsprint">Newsprint</option>
+                  <option value="dracula">Dracula</option>
+                  <option value="nord">Nord</option>
+                  <option value="github-light">GitHub Light</option>
+                </select>
+              </label>
             </div>
             {embedType === "composite" && (
               <div className="mt-4 flex flex-wrap gap-4 pt-4 border-t border-[#111111]">

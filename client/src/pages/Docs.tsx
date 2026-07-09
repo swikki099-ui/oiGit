@@ -40,6 +40,11 @@ export default function Docs() {
       name: "Top Repositories",
       path: "?type=repos&username={username}",
       desc: "Highlights your top 3 most starred repositories.",
+    },
+    {
+      name: "Composite (All Cards)",
+      path: "?type=composite&username={username}",
+      desc: "Renders all 7 card types in a single combined SVG.",
     }
   ];
 
@@ -144,6 +149,18 @@ export default function Docs() {
                   <li className="flex flex-col md:flex-row md:items-center gap-4">
                     <span className="font-bold font-mono text-lg w-32 border-b-2 border-[#CC0000] text-[#CC0000] pb-1">newsprint</span>
                     <span className="text-[#404040]">White background, absolute black borders, sharp corners (0px radius), Times New Roman / Monospace fonts.</span>
+                  </li>
+                  <li className="flex flex-col md:flex-row md:items-center gap-4">
+                    <span className="font-bold font-mono text-lg w-32 border-b-2 border-[#bd93f9] text-[#bd93f9] pb-1">dracula</span>
+                    <span className="text-[#404040]">Dracula theme: dark purple background, green/cyan/pink accents.</span>
+                  </li>
+                  <li className="flex flex-col md:flex-row md:items-center gap-4">
+                    <span className="font-bold font-mono text-lg w-32 border-b-2 border-[#88c0d0] text-[#88c0d0] pb-1">nord</span>
+                    <span className="text-[#404040]">Nord theme: arctic blue-grey background, frost accents.</span>
+                  </li>
+                  <li className="flex flex-col md:flex-row md:items-center gap-4">
+                    <span className="font-bold font-mono text-lg w-32 border-b-2 border-[#0969da] text-[#0969da] pb-1">github-light</span>
+                    <span className="text-[#404040]">GitHub Light: white background, blue accents, default borders.</span>
                   </li>
                 </ul>
 

@@ -7,8 +7,9 @@ const GITHUB_API = "https://api.github.com";
 const GITHUB_GRAPHQL = "https://api.github.com/graphql";
 
 // ─── In-Memory Cache ──────────────────────────────────────────────────────────
-// Keyed by lowercase username. TTL: 30 minutes.
+// Keyed by lowercase username. TTL: 30 minutes. Bounded to 500 entries (LRU).
 const CACHE_TTL_MS = 30 * 60 * 1000;
+const CACHE_MAX_SIZE = 500;
 
 interface CacheEntry {
   data: GitHubStats;
@@ -18,33 +19,30 @@ interface CacheEntry {
 const statsCache = new Map<string, CacheEntry>();
 
 function getCached(username: string): GitHubStats | null {
-  const entry = statsCache.get(username.toLowerCase());
+  const key = username.toLowerCase();
+  const entry = statsCache.get(key);
   if (!entry) return null;
   if (Date.now() > entry.expiresAt) {
-    statsCache.delete(username.toLowerCase());
+    statsCache.delete(key);
     return null;
   }
+  // Move to end (most recently used)
+  statsCache.delete(key);
+  statsCache.set(key, entry);
   return entry.data;
 }
 
 function setCache(username: string, data: GitHubStats): void {
-  statsCache.set(username.toLowerCase(), {
+  const key = username.toLowerCase();
+  // Delete stale entries when at capacity
+  if (statsCache.size >= CACHE_MAX_SIZE) {
+    const oldestKey = statsCache.keys().next().value;
+    if (oldestKey !== undefined) statsCache.delete(oldestKey);
+  }
+  statsCache.set(key, {
     data,
     expiresAt: Date.now() + CACHE_TTL_MS,
   });
-}
-
-/** Clears stale entries — call periodically to avoid unbounded memory growth. */
-function evictExpired(): void {
-  const now = Date.now();
-  Array.from(statsCache.entries()).forEach(([key, entry]) => {
-    if (now > entry.expiresAt) statsCache.delete(key);
-  });
-}
-
-// Evict expired entries occasionally (10% chance per request) to keep memory in check
-function maybeEvict(): void {
-  if (Math.random() < 0.1) evictExpired();
 }
 
 // ─── Trophy Logic ─────────────────────────────────────────────────────────────
@@ -351,27 +349,33 @@ async function getStreakStats(username: string): Promise<{
         )
       );
 
-    let currentStreak = 0;
-    let longestStreak = 0;
-    let tempStreak = 0;
-
     const today = new Date().toISOString().split("T")[0];
     const sortedDays = [...allDays].sort(
       (a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
 
-    let foundToday = false;
+    // Current streak: consecutive days backwards from today with contributions > 0
+    let currentStreak = 0;
+    let counting = false;
     for (const day of sortedDays) {
-      if (day.date === today || !foundToday) {
-        foundToday = true;
+      if (!counting) {
+        if (day.date === today) {
+          counting = true;
+          if (day.contributionCount > 0) currentStreak++;
+          // If today has 0, still start counting (today doesn't break a streak)
+        }
+      } else {
         if (day.contributionCount > 0) {
           currentStreak++;
-        } else if (day.date !== today) {
+        } else {
           break;
         }
       }
     }
 
+    // Longest streak: scan chronological order
+    let longestStreak = 0;
+    let tempStreak = 0;
     for (const day of allDays) {
       if (day.contributionCount > 0) {
         tempStreak++;
@@ -430,7 +434,6 @@ export async function getGitHubStats(username: string): Promise<GitHubStats> {
     return cached;
   }
 
-  maybeEvict();
   try {
     log(`Fetching stats for ${username}`);
 

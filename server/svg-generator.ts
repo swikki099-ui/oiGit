@@ -15,15 +15,22 @@ function escapeHtml(text: string): string {
     .replace(/'/g, "&#039;");
 }
 
-function getTheme(themeName?: string) {
-  if (themeName === "newsprint") {
-    return {
+interface Theme {
+  bg: string; border: string; text: string; textDim: string;
+  accent1: string; accent2: string; rx: string; strokeWidth: string;
+  fontHeader: string; fontLabel: string; fontValue: string;
+  fontDesc: string; fontFooter: string; heatmap: string[];
+}
+
+function getTheme(themeName?: string): Theme {
+  const themes: Record<string, Theme> = {
+    newsprint: {
       bg: "#ffffff",
       border: "#111111",
       text: "#111111",
       textDim: "#737373",
-      accent1: "#111111", // Headers
-      accent2: "#CC0000", // Highlights
+      accent1: "#111111",
+      accent2: "#CC0000",
       rx: "0",
       strokeWidth: "4",
       fontHeader: "900 24px 'Times New Roman', serif",
@@ -31,9 +38,60 @@ function getTheme(themeName?: string) {
       fontValue: "900 16px 'Times New Roman', serif",
       fontDesc: "400 10px monospace",
       fontFooter: "400 9px monospace",
-      heatmap: ["#111111", "#404040", "#737373", "#A3A3A3", "#ffffff"] // reverse order: max to zero
-    };
-  }
+      heatmap: ["#111111", "#404040", "#737373", "#A3A3A3", "#ffffff"],
+    },
+    dracula: {
+      bg: "#282a36",
+      border: "#6272a4",
+      text: "#f8f8f2",
+      textDim: "#6272a4",
+      accent1: "#50fa7b",
+      accent2: "#ff79c6",
+      rx: "4.5",
+      strokeWidth: "1",
+      fontHeader: "600 18px 'Segoe UI', Ubuntu, sans-serif",
+      fontLabel: "400 12px 'Segoe UI', Ubuntu, sans-serif",
+      fontValue: "600 16px 'Segoe UI', Ubuntu, sans-serif",
+      fontDesc: "400 10px 'Segoe UI', Ubuntu, sans-serif",
+      fontFooter: "400 9px 'Segoe UI', sans-serif",
+      heatmap: ["#50fa7b", "#8be9fd", "#bd93f9", "#ff79c6", "#282a36"],
+    },
+    nord: {
+      bg: "#2e3440",
+      border: "#4c566a",
+      text: "#eceff4",
+      textDim: "#81a1c1",
+      accent1: "#88c0d0",
+      accent2: "#bf616a",
+      rx: "4.5",
+      strokeWidth: "1",
+      fontHeader: "600 18px 'Segoe UI', Ubuntu, sans-serif",
+      fontLabel: "400 12px 'Segoe UI', Ubuntu, sans-serif",
+      fontValue: "600 16px 'Segoe UI', Ubuntu, sans-serif",
+      fontDesc: "400 10px 'Segoe UI', Ubuntu, sans-serif",
+      fontFooter: "400 9px 'Segoe UI', sans-serif",
+      heatmap: ["#a3be8c", "#81a1c1", "#88c0d0", "#5e81ac", "#2e3440"],
+    },
+    "github-light": {
+      bg: "#ffffff",
+      border: "#d0d7de",
+      text: "#1f2328",
+      textDim: "#656d76",
+      accent1: "#0969da",
+      accent2: "#bf3989",
+      rx: "4.5",
+      strokeWidth: "1",
+      fontHeader: "600 18px 'Segoe UI', Ubuntu, sans-serif",
+      fontLabel: "400 12px 'Segoe UI', Ubuntu, sans-serif",
+      fontValue: "600 16px 'Segoe UI', Ubuntu, sans-serif",
+      fontDesc: "400 10px 'Segoe UI', Ubuntu, sans-serif",
+      fontFooter: "400 9px 'Segoe UI', sans-serif",
+      heatmap: ["#216e39", "#30a14e", "#40c463", "#9be9a8", "#ebedf0"],
+    },
+  };
+
+  const theme = themeName ? themes[themeName] : undefined;
+  if (theme) return theme;
 
   // default dark classic
   return {
@@ -41,8 +99,8 @@ function getTheme(themeName?: string) {
     border: "#30363d",
     text: "#c9d1d9",
     textDim: "#8b949e",
-    accent1: "#2ea043", // Stats default
-    accent2: "#fb8500", // Streak
+    accent1: "#2ea043",
+    accent2: "#fb8500",
     rx: "4.5",
     strokeWidth: "1",
     fontHeader: "600 18px 'Segoe UI', Ubuntu, sans-serif",
@@ -50,7 +108,7 @@ function getTheme(themeName?: string) {
     fontValue: "600 16px 'Segoe UI', Ubuntu, sans-serif",
     fontDesc: "400 10px 'Segoe UI', Ubuntu, sans-serif",
     fontFooter: "400 9px 'Segoe UI', sans-serif",
-    heatmap: ["#39d353", "#26a641", "#006d32", "#0e4429", "#161b22"] // max to zero
+    heatmap: ["#39d353", "#26a641", "#006d32", "#0e4429", "#161b22"],
   };
 }
 
@@ -333,5 +391,72 @@ export function generateTopReposSVG(stats: GitHubStats, opts?: SvgOptions): stri
   <text x="${CARD_WIDTH - 10}" y="${height - 10}" text-anchor="end" class="footer">Oi Git</text>
   <text x="25" y="35" class="header">Top Repositories</text>
   ${reposHTML}
+</svg>`.trim();
+}
+
+/** Extract the height from an SVG string by parsing viewBox or height attribute. */
+function extractSvgHeight(svg: string): number {
+  const viewBoxMatch = svg.match(/viewBox="[^"]*\s(\d+)"/);
+  if (viewBoxMatch) return parseInt(viewBoxMatch[1], 10);
+  const heightMatch = svg.match(/height="(\d+)"/);
+  if (heightMatch) return parseInt(heightMatch[1], 10);
+  return 150;
+}
+
+/** Extract inner content (between <svg> and </svg>), stripping the wrapper. */
+function stripSvgWrapper(svg: string): string {
+  const start = svg.indexOf(">") + 1;
+  const end = svg.lastIndexOf("</svg>");
+  return svg.slice(start, end).trim();
+}
+
+export function generateCompositeSVG(stats: GitHubStats, opts?: SvgOptions): string {
+  const generators = [
+    generateStatsSVG,
+    generateLanguagesSVG,
+    generateStreakSVG,
+    generateTrophiesSVG,
+    generateOverviewSVG,
+    generateHeatmapSVG,
+    generateTopReposSVG,
+  ];
+
+  const cards = generators.map((fn) => fn(stats, opts));
+  const gap = 16;
+
+  let totalHeight = 0;
+  const offsets: number[] = [];
+  for (const card of cards) {
+    offsets.push(totalHeight);
+    totalHeight += extractSvgHeight(card) + gap;
+  }
+  totalHeight -= gap; // remove trailing gap
+
+  const t = getTheme(opts?.theme);
+  const isNewsprint = opts?.theme === "newsprint";
+
+  const inner = cards
+    .map((card, i) => {
+      const innerSvg = stripSvgWrapper(card);
+      return `<g transform="translate(0, ${offsets[i]})">\n${innerSvg}\n</g>`;
+    })
+    .join("\n\n");
+
+  return `<svg width="${CARD_WIDTH}" height="${totalHeight}" viewBox="0 0 ${CARD_WIDTH} ${totalHeight}" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .header     { font: ${t.fontHeader}; fill: ${t.accent1}; text-transform: ${isNewsprint ? 'uppercase' : 'none'} }
+    .stat-label { font: ${t.fontLabel}; fill: ${t.textDim}; text-transform: ${isNewsprint ? 'uppercase' : 'none'} }
+    .stat-value { font: ${t.fontValue}; fill: ${t.text} }
+    .footer     { font: ${t.fontFooter}; fill: ${t.textDim}; text-transform: uppercase }
+    .lang-label  { font: ${t.fontLabel}; fill: ${t.text}; text-transform: ${isNewsprint ? 'uppercase' : 'none'} }
+    .lang-percent{ font: ${t.fontLabel}; fill: ${t.textDim} }
+    .rank { font: ${isNewsprint ? "900 64px 'Times New Roman', serif" : "800 48px 'Segoe UI', sans-serif"}; fill: ${isNewsprint ? t.text : '#e3b341'} }
+    .score { font: ${t.fontLabel}; fill: ${t.textDim}; text-transform: uppercase }
+    .trophy-rank { font: 700 18px 'Segoe UI', Ubuntu, sans-serif }
+    .trophy-name { font: 600 13px 'Segoe UI', Ubuntu, sans-serif; fill: #c9d1d9 }
+    .trophy-desc { font: 400 10px 'Segoe UI', Ubuntu, sans-serif; fill: #8b949e }
+  </style>
+  <rect width="${CARD_WIDTH}" height="${totalHeight}" rx="${t.rx}" fill="${t.bg}" stroke="${t.border}" stroke-width="${t.strokeWidth}"/>
+  ${inner}
 </svg>`.trim();
 }
